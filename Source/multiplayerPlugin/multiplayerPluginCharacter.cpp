@@ -159,6 +159,8 @@ void AmultiplayerPluginCharacter::JoinGameSession()
 	sessSearchSettings->MaxSearchResults = 10000;
 	//it's not a LAN game
 	sessSearchSettings->bIsLanQuery = false;
+
+
 	/** Search for presence sessions only (because when we created the session we allowed presence */	
 	sessSearchSettings->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
