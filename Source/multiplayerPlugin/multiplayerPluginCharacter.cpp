@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "OnlineSessionSettings.h" // for session creation settings
 
+#include "Online/OnlineSessionNames.h" //for SEARCH_PRESENCE
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -21,7 +23,8 @@ AmultiplayerPluginCharacter::AmultiplayerPluginCharacter():
 	/* &ThisClass is used instead of &AmultiplayerPluginCharacter 
 		create a delegate bounded to OncreateComplete 
 	*/
-	createSessionCompleteDelegate((FOnCreateSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnCreateSessionComplete)))
+	createSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnCreateSessionComplete)),
+	findSessionCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this,&ThisClass::OnFindSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -119,6 +122,10 @@ void AmultiplayerPluginCharacter::CreateGameSession()
 	SessSettings->bUsesPresence = true;
 
 	SessSettings->bIsDedicated = false;
+
+	//if cannot find sessions enable this
+	SessSettings->bUseLobbiesIfAvailable = true;
+	
 	//host player id
 	const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	
@@ -131,6 +138,33 @@ void AmultiplayerPluginCharacter::CreateGameSession()
 	}
 
 
+}
+
+void AmultiplayerPluginCharacter::JoinGameSession()
+{
+	if (!OnlineSessionInterface.IsValid()) {
+		GEngine->AddOnScreenDebugMessage(
+			-1, 15.f, FColor::Red,
+			FString::Printf(TEXT("invalid session")));
+		return;
+	}
+	//add onfind delegate
+	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(findSessionCompleteDelegate);
+
+	auto UserUniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
+	sessSearchSettings = MakeShareable(new FOnlineSessionSearch());
+	
+	//in normal case we should select something lower(4) but since our steam id is shared(480)
+	//many users use that
+	sessSearchSettings->MaxSearchResults = 10000;
+	//it's not a LAN game
+	sessSearchSettings->bIsLanQuery = false;
+	/** Search for presence sessions only (because when we created the session we allowed presence */	
+	sessSearchSettings->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+
+
+	OnlineSessionInterface->FindSessions(*UserUniqueId, sessSearchSettings.ToSharedRef());
 }
 
 void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -146,6 +180,28 @@ void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, boo
 		GEngine->AddOnScreenDebugMessage(
 			-1, 15.f, FColor::Red,
 			FString::Printf(TEXT("failed to create session")));
+	}
+}
+
+void AmultiplayerPluginCharacter::OnFindSessionComplete(bool bWasSuccessful)
+{
+
+	if (!bWasSuccessful)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1, 15.f, FColor::Red,
+			FString::Printf(TEXT("failed to join session")));
+		return;
+	}
+
+	for(auto result : sessSearchSettings->SearchResults)
+	{
+		FString sessId = result.GetSessionIdStr();
+		FString user = result.Session.OwningUserName;
+
+		GEngine->AddOnScreenDebugMessage(
+			-1, 15.f, FColor::Green,
+			FString::Printf(TEXT("id: %s user: %s"),*sessId,*user));
 	}
 }
 

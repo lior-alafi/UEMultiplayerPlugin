@@ -79,13 +79,19 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void CreateGameSession(); 
 
+	UFUNCTION(BlueprintCallable)
+	void JoinGameSession();
+
 	//callback for delegates
 	void OnCreateSessionComplete(FName SessionName,bool bWasSuccessful);
-
+	void OnFindSessionComplete(bool  bWasSuccessful);
 private:
 	//delegate
 	FOnCreateSessionCompleteDelegate createSessionCompleteDelegate;
 
+	FOnFindSessionsCompleteDelegate findSessionCompleteDelegate;
+
+	TSharedPtr<FOnlineSessionSearch> sessSearchSettings;
 public:
 	//no fwd decleration so	#include "Interfaces/OnlineSessionInterface.h"
 	IOnlineSessionPtr OnlineSessionInterface;
