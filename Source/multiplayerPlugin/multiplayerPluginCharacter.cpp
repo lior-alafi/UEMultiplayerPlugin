@@ -24,7 +24,8 @@ AmultiplayerPluginCharacter::AmultiplayerPluginCharacter():
 		create a delegate bounded to OncreateComplete 
 	*/
 	createSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnCreateSessionComplete)),
-	findSessionCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this,&ThisClass::OnFindSessionComplete))
+	findSessionCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this,&ThisClass::OnFindSessionComplete)),
+	joinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnJoinSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -174,6 +175,11 @@ void AmultiplayerPluginCharacter::JoinGameSession()
 
 void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (!OnlineSessionInterface.IsValid()) {
+		return;
+	}
+
+
 	if (bWasSuccessful)
 	{
 		GEngine->AddOnScreenDebugMessage(
@@ -197,6 +203,9 @@ void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, boo
 
 void AmultiplayerPluginCharacter::OnFindSessionComplete(bool bWasSuccessful)
 {
+	if (!OnlineSessionInterface.IsValid()) {
+		return;
+	}
 
 	if (!bWasSuccessful)
 	{
@@ -210,10 +219,42 @@ void AmultiplayerPluginCharacter::OnFindSessionComplete(bool bWasSuccessful)
 	{
 		FString sessId = result.GetSessionIdStr();
 		FString user = result.Session.OwningUserName;
+		FString matchType;
+		//if value for this key is the same type as value provide(Fstring) it will fill that variable
+		bool found = result.Session.SessionSettings.Get(FName("MatchType"),matchType);
+		if (found && GEngine && matchType == FString("FreeForAll")) {
+			GEngine->AddOnScreenDebugMessage(
+				-1, 15.f, FColor::Green,
+				FString::Printf(TEXT("id: %s user: %s matchType: %s"), *sessId, *user,*matchType));
 
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Green,
-			FString::Printf(TEXT("id: %s user: %s"),*sessId,*user));
+			//register delegate
+			OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(joinSessionCompleteDelegate);
+			
+			const auto uniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
+			OnlineSessionInterface->JoinSession(*uniqueId, NAME_GameSession, result);
+		}
+
+	}
+}
+
+void AmultiplayerPluginCharacter::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type result)
+{
+	if (!OnlineSessionInterface.IsValid()) {
+		return;
+	}
+
+	//now get address
+	FString Address;
+	if (GEngine && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.f,
+			FColor::Green, FString::Printf(TEXT("client connected to address %s"), *Address));
+
+		//get playercontroller of this instance
+		APlayerController* playerCtrller = GetGameInstance()->GetFirstLocalPlayerController();
+		if (playerCtrller) {
+			//travel to this address
+			playerCtrller->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+		}
 	}
 }
 

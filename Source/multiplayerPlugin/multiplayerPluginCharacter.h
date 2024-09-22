@@ -85,6 +85,7 @@ protected:
 	//callback for delegates
 	void OnCreateSessionComplete(FName SessionName,bool bWasSuccessful);
 	void OnFindSessionComplete(bool  bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type result);
 private:
 	//delegate
 	FOnCreateSessionCompleteDelegate createSessionCompleteDelegate;
@@ -92,6 +93,9 @@ private:
 	FOnFindSessionsCompleteDelegate findSessionCompleteDelegate;
 
 	TSharedPtr<FOnlineSessionSearch> sessSearchSettings;
+
+	FOnJoinSessionCompleteDelegate joinSessionCompleteDelegate;
+
 public:
 	//no fwd decleration so	#include "Interfaces/OnlineSessionInterface.h"
 	IOnlineSessionPtr OnlineSessionInterface;
