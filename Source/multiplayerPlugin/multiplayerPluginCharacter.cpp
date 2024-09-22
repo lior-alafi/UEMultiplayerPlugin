@@ -126,6 +126,9 @@ void AmultiplayerPluginCharacter::CreateGameSession()
 	//if cannot find sessions enable this
 	SessSettings->bUseLobbiesIfAvailable = true;
 	
+	//creating a custom (matchType) session attribute
+	SessSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
 	//host player id
 	const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	
@@ -176,6 +179,13 @@ void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, boo
 		GEngine->AddOnScreenDebugMessage(
 			-1, 15.f, FColor::Blue,
 			FString::Printf(TEXT("%s created successfuly"), *SessionName.ToString()));
+
+		//Jump to the Lobby level after session was created
+		UWorld* world = GetWorld();
+		if (world)
+		{
+			world->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
+		}
 	}
 	else
 	{
