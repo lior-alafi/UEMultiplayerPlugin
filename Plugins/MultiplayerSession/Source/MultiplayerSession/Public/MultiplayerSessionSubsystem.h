@@ -25,6 +25,12 @@ private:
 	FOnDestroySessionCompleteDelegate OnSessDestroyDelegate;
 	FOnStartSessionCompleteDelegate OnSessStartDelegate;
 
+	//delegates handles
+	FDelegateHandle OnSessCreate_handle;
+	FDelegateHandle OnSessFind_handle;
+	FDelegateHandle OnSessJoin_handle;
+	FDelegateHandle OnSessDestroy_handle;
+	FDelegateHandle OnSessStart_handle;
 
 protected:
 	//calbacks
