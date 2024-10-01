@@ -29,7 +29,9 @@ public class MultiplayerSession : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 				"OnlineSubsystem",
 				"OnlineSubsystemSteam",
-                "UMG"
+                "UMG",
+				"Slate",
+				"SlateCore"
             }
 			);
 			
