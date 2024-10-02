@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SessMenuBase.generated.h"
 
+
 ///**
 // * 
 // */
@@ -15,6 +16,15 @@ class MULTIPLAYERSESSION_API USessMenuBase : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+
+	//bind the button to a bp widget button with the same name
+	UPROPERTY(meta = (BindWidget))
+	//must be the same name as on the BP widget
+	class UButton* hostBtn;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* joinBtn;
+
 
 protected:
 
