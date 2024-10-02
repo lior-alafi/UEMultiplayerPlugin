@@ -25,8 +25,13 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* joinBtn;
 
+	UFUNCTION()
+	void hostButtonClicked();
 
+	UFUNCTION()
+	void joinButtonClicked();
 protected:
+	virtual bool Initialize();
 
 public:
 	UFUNCTION(BlueprintCallable)
