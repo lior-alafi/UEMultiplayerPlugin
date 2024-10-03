@@ -3,6 +3,7 @@
 
 #include "SessMenuBase.h"
 #include "Components/Button.h"
+#include "MultiplayerSessionSubsystem.h"
 
 void USessMenuBase::hostButtonClicked()
 {
@@ -13,6 +14,11 @@ void USessMenuBase::hostButtonClicked()
 			FColor::Yellow,
 			FString(TEXT("hosting..."))
 		);
+	}
+
+	//lay host a session basic 
+	if (onlineSessSubsystem) {
+		onlineSessSubsystem->CreateSession(MaxConnections, GameType);
 	}
 }
 
@@ -26,6 +32,10 @@ void USessMenuBase::joinButtonClicked()
 			FString(TEXT("joining..."))
 		);
 	}
+	//lay join session basic
+	if (onlineSessSubsystem) {
+		onlineSessSubsystem->FindSessions(10000);
+	}
 }
 
 bool USessMenuBase::Initialize()
@@ -34,7 +44,7 @@ bool USessMenuBase::Initialize()
 	{
 		return false;
 	}
-
+	
 	if (!hostBtn || !joinBtn) {
 		return false;
 	}
@@ -44,8 +54,12 @@ bool USessMenuBase::Initialize()
 	return true;
 }
 
-void USessMenuBase::menuSetup()
+void USessMenuBase::menuSetup(int32 maxConns, FString gameType)
 {
+
+	MaxConnections = maxConns;
+	GameType = gameType;
+
 	//adds widget to viewport
 	AddToViewport();
 	//set visible
@@ -68,8 +82,12 @@ void USessMenuBase::menuSetup()
 			playerController->SetInputMode(uiOnlyMode);
 			playerController->SetShowMouseCursor(true);
 
+			
 		}
-		
 	}
+
+	UGameInstance* instance = GetGameInstance();
+	if (!instance) return;
+	onlineSessSubsystem = instance->GetSubsystem<UMultiplayerSessionSubsystem>();
 
 }

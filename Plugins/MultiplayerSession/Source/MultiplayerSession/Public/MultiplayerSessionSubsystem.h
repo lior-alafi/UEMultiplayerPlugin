@@ -16,6 +16,7 @@ class MULTIPLAYERSESSION_API UMultiplayerSessionSubsystem : public UGameInstance
 	GENERATED_BODY()
 	
 private:
+
 	IOnlineSessionPtr OnlineSession;
 	
 	//delegates

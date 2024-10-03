@@ -16,6 +16,8 @@ class MULTIPLAYERSESSION_API USessMenuBase : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+	int32 MaxConnections;
+	FString GameType;
 
 	//bind the button to a bp widget button with the same name
 	UPROPERTY(meta = (BindWidget))
@@ -30,10 +32,13 @@ private:
 
 	UFUNCTION()
 	void joinButtonClicked();
+
+	//forward declare our plugin subsystem
+	class UMultiplayerSessionSubsystem* onlineSessSubsystem;
 protected:
 	virtual bool Initialize();
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void menuSetup();
+	void menuSetup(int32 maxConnections = 4, FString gameType = "freeforall");
 };
