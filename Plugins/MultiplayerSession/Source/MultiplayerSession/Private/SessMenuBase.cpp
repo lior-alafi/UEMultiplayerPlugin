@@ -44,6 +44,24 @@ void USessMenuBase::joinButtonClicked()
 	}
 }
 
+void USessMenuBase::menuTeardown()
+{
+	RemoveFromParent();
+	UWorld* world = GetWorld();
+	if (world) {
+		APlayerController* playerCtrler = world->GetFirstPlayerController();
+		if (playerCtrler)
+		{
+			//make sure we can move our character again
+			FInputModeGameOnly gameOnly;
+			playerCtrler->SetInputMode(gameOnly);
+
+			//hide mouse (we no longer need it(?))
+			playerCtrler->SetShowMouseCursor(false);
+		}
+	}
+}
+
 bool USessMenuBase::Initialize()
 {
 	if (!Super::Initialize())
@@ -58,6 +76,13 @@ bool USessMenuBase::Initialize()
 	hostBtn->OnClicked.AddDynamic(this, &ThisClass::hostButtonClicked);
 	joinBtn->OnClicked.AddDynamic(this, &ThisClass::joinButtonClicked);
 	return true;
+}
+
+void USessMenuBase::NativeDestruct()
+{
+	menuTeardown();
+
+	Super::NativeDestruct();
 }
 
 void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
@@ -82,13 +107,13 @@ void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 	if (world) {
 		APlayerController* playerController = world->GetFirstPlayerController();
 		if (playerController) {
+
+			//focus mouse on the widget
 			FInputModeUIOnly uiOnlyMode;
 			uiOnlyMode.SetWidgetToFocus(TakeWidget());
 			uiOnlyMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			playerController->SetInputMode(uiOnlyMode);
 			playerController->SetShowMouseCursor(true);
-
-			
 		}
 	}
 

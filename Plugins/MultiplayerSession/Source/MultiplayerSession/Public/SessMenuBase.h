@@ -34,12 +34,19 @@ private:
 	UFUNCTION()
 	void joinButtonClicked();
 
+	void menuTeardown();
+
 	//forward declare our plugin subsystem
 	class UMultiplayerSessionSubsystem* onlineSessSubsystem;
 protected:
 	virtual bool Initialize();
 
+	//destroy widget 
+	virtual void NativeDestruct() override;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void menuSetup(FString lobby,int32 maxConnections = 4, FString gameType = TEXT("freeforall"));
+
+
 };
