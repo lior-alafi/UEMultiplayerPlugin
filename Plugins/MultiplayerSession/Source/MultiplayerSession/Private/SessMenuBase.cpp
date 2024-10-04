@@ -19,6 +19,12 @@ void USessMenuBase::hostButtonClicked()
 	//lay host a session basic 
 	if (onlineSessSubsystem) {
 		onlineSessSubsystem->CreateSession(MaxConnections, GameType);
+		UWorld* world = GetWorld();
+		if (world)
+		{
+			//travel to lobby
+			world->ServerTravel(FString::Printf(TEXT("%s?listen"), *LobbyPath));
+		}
 	}
 }
 
@@ -54,12 +60,12 @@ bool USessMenuBase::Initialize()
 	return true;
 }
 
-void USessMenuBase::menuSetup(int32 maxConns, FString gameType)
+void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 {
 
 	MaxConnections = maxConns;
 	GameType = gameType;
-
+	LobbyPath = lobby;
 	//adds widget to viewport
 	AddToViewport();
 	//set visible

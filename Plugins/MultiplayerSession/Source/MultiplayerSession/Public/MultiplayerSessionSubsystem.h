@@ -16,9 +16,9 @@ class MULTIPLAYERSESSION_API UMultiplayerSessionSubsystem : public UGameInstance
 	GENERATED_BODY()
 	
 private:
-
 	IOnlineSessionPtr OnlineSession;
 	
+	TSharedPtr<FOnlineSessionSettings> SessSettings;
 	//delegates
 	FOnCreateSessionCompleteDelegate OnSessCreateDelegate;
 	FOnFindSessionsCompleteDelegate OnSessFindDelegate;
@@ -33,6 +33,7 @@ private:
 	FDelegateHandle OnSessDestroy_handle;
 	FDelegateHandle OnSessStart_handle;
 
+	bool PrepareSessionSettings(int32 numPublicPlayers, FString matchType);
 protected:
 	//calbacks
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);

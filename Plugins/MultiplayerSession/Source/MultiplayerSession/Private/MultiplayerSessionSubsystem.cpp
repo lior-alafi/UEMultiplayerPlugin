@@ -3,10 +3,36 @@
 
 #include "MultiplayerSessionSubsystem.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h" // for session creation settings
 
+#include "Online/OnlineSessionNames.h" //for SEARCH_PRESENCE
+
+
+bool UMultiplayerSessionSubsystem::PrepareSessionSettings(int32 numPublicPlayers, FString matchType)
+{
+	SessSettings = MakeShareable(new FOnlineSessionSettings());
+	
+	//subsystem named NULL are basically LAN
+	SessSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	//allow join ongoing session
+	SessSettings->bAllowJoinInProgress = true;
+	SessSettings->bAllowJoinViaPresence = true;
+	SessSettings->bIsDedicated = false;
+	
+	SessSettings->bShouldAdvertise = true;
+	SessSettings->bUseLobbiesIfAvailable = true;
+	SessSettings->bUsesPresence = true;
+	SessSettings->NumPublicConnections = numPublicPlayers;
+	SessSettings->Set(FName("MatchType"), matchType,EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
+	return true;
+}
 
 void UMultiplayerSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (!bWasSuccessful || !OnlineSession.IsValid()) return;
+
+	
 }
 
 void UMultiplayerSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
@@ -38,15 +64,36 @@ UMultiplayerSessionSubsystem::UMultiplayerSessionSubsystem() :
 	if (subsystem) {
 		//log
 		OnlineSession = subsystem->GetSessionInterface();
-		if (OnlineSession.IsValid()) {
-		}
+		
 	}
 	
-
 }
 
 void UMultiplayerSessionSubsystem::CreateSession(int32 numPublicPlayers, FString matchType)
 {
+	if (!OnlineSession.IsValid()) {
+		return;
+	}
+	//check if a session exists if so we disconnect and connect to a new one
+	auto existingSession = OnlineSession->GetNamedSession(NAME_GameSession);
+	if (!existingSession)
+	{
+		OnlineSession->DestroySession(NAME_GameSession);
+	}
+
+	//store delegate in fdelegate, we need to remove the delegate later
+	OnSessCreate_handle = OnlineSession->AddOnCreateSessionCompleteDelegate_Handle(OnSessCreateDelegate);
+	
+	PrepareSessionSettings(numPublicPlayers, matchType);
+	
+	const int32 uniqueId = GetWorld()->GetFirstPlayerController()->GetUniqueID();	
+	if (!OnlineSession->CreateSession(uniqueId, NAME_GameSession, *SessSettings))
+	{
+		//if we failed to create a session clear delegate
+
+		OnlineSession->ClearOnCreateSessionCompleteDelegate_Handle(OnSessCreate_handle);
+	}
+
 }
 
 void UMultiplayerSessionSubsystem::FindSessions(int32 numOfSessionsResults)

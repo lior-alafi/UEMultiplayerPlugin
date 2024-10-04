@@ -18,6 +18,7 @@ class MULTIPLAYERSESSION_API USessMenuBase : public UUserWidget
 private:
 	int32 MaxConnections;
 	FString GameType;
+	FString LobbyPath;
 
 	//bind the button to a bp widget button with the same name
 	UPROPERTY(meta = (BindWidget))
@@ -40,5 +41,5 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void menuSetup(int32 maxConnections = 4, FString gameType = "freeforall");
+	void menuSetup(FString lobby,int32 maxConnections = 4, FString gameType = TEXT("freeforall"));
 };
