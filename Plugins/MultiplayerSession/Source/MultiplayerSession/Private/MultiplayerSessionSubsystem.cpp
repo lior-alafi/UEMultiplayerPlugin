@@ -79,7 +79,9 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 numPublicPlayers, FString
 	}
 	//check if a session exists if so we disconnect and connect to a new one
 	auto existingSession = OnlineSession->GetNamedSession(NAME_GameSession);
-	if (!existingSession)
+
+	//do not replace this to !existingSession IT WILL NOT CLOSE SESSIONS
+	if (existingSession != nullptr)
 	{
 		OnlineSession->DestroySession(NAME_GameSession);
 	}
