@@ -30,9 +30,12 @@ bool UMultiplayerSessionSubsystem::PrepareSessionSettings(int32 numPublicPlayers
 
 void UMultiplayerSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	if (!bWasSuccessful || !OnlineSession.IsValid()) return;
-
-	
+	if (OnlineSession) {
+		//if fail let's clear the delegate from list
+		OnlineSession->ClearOnCreateSessionCompleteDelegate_Handle(OnSessCreate_handle);
+	}
+	//multicast is broadcast
+	MultiPlayerOnSessionCreatedDelegate.Broadcast(bWasSuccessful);	
 }
 
 void UMultiplayerSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
@@ -92,8 +95,8 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 numPublicPlayers, FString
 		//if we failed to create a session clear delegate
 
 		OnlineSession->ClearOnCreateSessionCompleteDelegate_Handle(OnSessCreate_handle);
+		MultiPlayerOnSessionCreatedDelegate.Broadcast(false);
 	}
-
 }
 
 void UMultiplayerSessionSubsystem::FindSessions(int32 numOfSessionsResults)

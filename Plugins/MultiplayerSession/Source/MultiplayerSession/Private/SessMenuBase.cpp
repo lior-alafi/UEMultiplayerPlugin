@@ -19,12 +19,6 @@ void USessMenuBase::hostButtonClicked()
 	//lay host a session basic 
 	if (onlineSessSubsystem) {
 		onlineSessSubsystem->CreateSession(MaxConnections, GameType);
-		UWorld* world = GetWorld();
-		if (world)
-		{
-			//travel to lobby
-			world->ServerTravel(FString::Printf(TEXT("%s?listen"), *LobbyPath));
-		}
 	}
 }
 
@@ -85,6 +79,25 @@ void USessMenuBase::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+void USessMenuBase::OnCreateSession(bool bWasSuccessful)
+{
+	
+	if (GEngine) {
+		FColor color = bWasSuccessful ? FColor::Green : FColor::Red;
+		FString msg = bWasSuccessful ? FString(TEXT("host session successfully")) : FString(TEXT("failed to host session"));
+		GEngine->AddOnScreenDebugMessage(
+			-1, 15.f, color, msg);
+	}
+	if (bWasSuccessful) {
+		UWorld* world = GetWorld();
+		if (!world) {
+			return;
+		}
+		//travel to lobby
+		world->ServerTravel(FString::Printf(TEXT("%s?listen"), *LobbyPath));
+	}
+}
+
 void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 {
 
@@ -120,5 +133,9 @@ void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 	UGameInstance* instance = GetGameInstance();
 	if (!instance) return;
 	onlineSessSubsystem = instance->GetSubsystem<UMultiplayerSessionSubsystem>();
+	if (onlineSessSubsystem) {
+		//bind custom delegates
+		onlineSessSubsystem->MultiPlayerOnSessionCreatedDelegate.AddDynamic(this, &ThisClass::OnCreateSession);
 
+	}
 }

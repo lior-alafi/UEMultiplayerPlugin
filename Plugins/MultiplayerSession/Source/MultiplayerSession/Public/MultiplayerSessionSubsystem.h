@@ -7,6 +7,9 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "MultiplayerSessionSubsystem.generated.h"
 
+//define delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnSessionCreated, bool, bWasSuccessful);
+
 /**
  * 
  */
@@ -49,4 +52,8 @@ public:
 	void JoinSession(const FOnlineSessionSearchResult& sessResult);
 	void DestroySession();
 	void StartSession();
+
+	//custom delegates
+	
+	FMultiplayerOnSessionCreated MultiPlayerOnSessionCreatedDelegate;
 };

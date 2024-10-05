@@ -44,6 +44,10 @@ protected:
 	//destroy widget 
 	virtual void NativeDestruct() override;
 
+//custom delegates callback
+	UFUNCTION()
+	virtual void OnCreateSession(bool bWasSuccessful);
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void menuSetup(FString lobby,int32 maxConnections = 4, FString gameType = TEXT("freeforall"));
