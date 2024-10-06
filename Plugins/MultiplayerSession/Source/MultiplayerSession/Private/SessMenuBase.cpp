@@ -5,6 +5,8 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionSubsystem.h"
 
+#include "OnlineSessionSettings.h" 
+
 void USessMenuBase::hostButtonClicked()
 {
 	if (GEngine) {
@@ -98,6 +100,22 @@ void USessMenuBase::OnCreateSession(bool bWasSuccessful)
 	}
 }
 
+void USessMenuBase::OnFindSessions(const TArray<FOnlineSessionSearchResult>& sess, bool bWasSuccessful)
+{
+}
+
+void USessMenuBase::OnJoinSession(EOnJoinSessionCompleteResult::Type result)
+{
+}
+
+void USessMenuBase::OnDestroySession(bool bWasSuccessful)
+{
+}
+
+void USessMenuBase::OnStartSession(bool bWasSuccessful)
+{
+}
+
 void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 {
 
@@ -136,6 +154,11 @@ void USessMenuBase::menuSetup(FString lobby,int32 maxConns, FString gameType)
 	if (onlineSessSubsystem) {
 		//bind custom delegates
 		onlineSessSubsystem->MultiPlayerOnSessionCreatedDelegate.AddDynamic(this, &ThisClass::OnCreateSession);
-
+		onlineSessSubsystem->MultiplayerOnSessionDestroyDelegate.AddDynamic(this, &ThisClass::OnDestroySession);
+		onlineSessSubsystem->MultiplayerOnSessionStartDelegate.AddDynamic(this, &ThisClass::OnStartSession);
+		
+		//not dynamic session delegates
+		onlineSessSubsystem->MultiplayerOnSessionFindDelegate.AddUObject(this, &ThisClass::OnFindSessions);
+		onlineSessSubsystem->MultiplayerOnSessionJoinDelegate.AddUObject(this, &ThisClass::OnJoinSession);
 	}
 }

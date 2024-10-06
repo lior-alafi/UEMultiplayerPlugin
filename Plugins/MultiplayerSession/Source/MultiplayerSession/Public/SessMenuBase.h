@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "SessMenuBase.generated.h"
 
 
@@ -47,6 +48,14 @@ protected:
 //custom delegates callback
 	UFUNCTION()
 	virtual void OnCreateSession(bool bWasSuccessful);
+
+	virtual void OnFindSessions(const TArray<FOnlineSessionSearchResult>& sess, bool bWasSuccessful);
+	virtual void OnJoinSession(EOnJoinSessionCompleteResult::Type result);
+	UFUNCTION()
+	virtual void OnDestroySession(bool bWasSuccessful);
+
+	UFUNCTION()
+	virtual void OnStartSession(bool bWasSuccessful);
 
 public:
 	UFUNCTION(BlueprintCallable)

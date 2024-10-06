@@ -9,6 +9,10 @@
 
 //define delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnSessionCreated, bool, bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnSessionFind,const TArray<FOnlineSessionSearchResult> &sess, bool bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnSessionJoin, EOnJoinSessionCompleteResult::Type result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnSessionDestroy,bool,bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnSessionStart,bool,bWasSuccessful);
 
 /**
  * 
@@ -54,6 +58,10 @@ public:
 	void StartSession();
 
 	//custom delegates
-	
+
 	FMultiplayerOnSessionCreated MultiPlayerOnSessionCreatedDelegate;
+	FMultiplayerOnSessionFind MultiplayerOnSessionFindDelegate;
+	FMultiplayerOnSessionJoin MultiplayerOnSessionJoinDelegate;
+	FMultiplayerOnSessionDestroy MultiplayerOnSessionDestroyDelegate;
+	FMultiplayerOnSessionStart MultiplayerOnSessionStartDelegate;
 };
