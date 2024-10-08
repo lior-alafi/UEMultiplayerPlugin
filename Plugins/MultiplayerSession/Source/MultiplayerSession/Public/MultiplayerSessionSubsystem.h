@@ -26,6 +26,7 @@ private:
 	IOnlineSessionPtr OnlineSession;
 	
 	TSharedPtr<FOnlineSessionSettings> SessSettings;
+	TSharedPtr<FOnlineSessionSearch> searchSessSettings;
 	//delegates
 	FOnCreateSessionCompleteDelegate OnSessCreateDelegate;
 	FOnFindSessionsCompleteDelegate OnSessFindDelegate;

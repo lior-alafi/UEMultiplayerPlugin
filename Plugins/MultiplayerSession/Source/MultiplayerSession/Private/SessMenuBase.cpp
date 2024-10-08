@@ -102,10 +102,47 @@ void USessMenuBase::OnCreateSession(bool bWasSuccessful)
 
 void USessMenuBase::OnFindSessions(const TArray<FOnlineSessionSearchResult>& sess, bool bWasSuccessful)
 {
+	if (!bWasSuccessful && GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString("failed to find a session"));
+		return;
+	}
+	if (onlineSessSubsystem == nullptr) {
+		return;
+	}
+	for (const auto& res : sess)
+	{
+		if (res.IsValid())
+		{
+			FString val;
+			//if value for this key("MatchType") is the same type as value provide(Fstring) it will fill that variable
+			res.Session.SessionSettings.Get("MatchType", val);
+
+			if (val == GameType)
+			{
+				onlineSessSubsystem->JoinSession(res);
+				return;
+			}
+		} 
+	}
 }
 
 void USessMenuBase::OnJoinSession(EOnJoinSessionCompleteResult::Type result)
 {
+	//1. get correct address 
+	//2. client travel to that address
+	IOnlineSubsystem* subsystem = IOnlineSubsystem::Get();
+	if (subsystem) {
+		IOnlineSessionPtr  OnlineSessionInterface = subsystem->GetSessionInterface();
+		FString Address;
+		if (GEngine && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+			//get playercontroller of this instance
+			APlayerController* playerCtrller = GetGameInstance()->GetFirstLocalPlayerController();
+			if (playerCtrller) {
+				//travel to this address
+				playerCtrller->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+			}
+		}
+	}
 }
 
 void USessMenuBase::OnDestroySession(bool bWasSuccessful)
