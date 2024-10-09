@@ -23,8 +23,10 @@ bool UMultiplayerSessionSubsystem::PrepareSessionSettings(int32 numPublicPlayers
 	SessSettings->bUseLobbiesIfAvailable = true;
 	SessSettings->bUsesPresence = true;
 	SessSettings->NumPublicConnections = numPublicPlayers;
-	SessSettings->Set(FName("MatchType"), matchType,EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
+	SessSettings->Set(FName("MatchType"), matchType,EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	//allow more sessions to be opened
+	SessSettings->BuildUniqueId = 1;
 	return true;
 }
 
@@ -62,10 +64,21 @@ void UMultiplayerSessionSubsystem::OnJoinSessionComplete(FName SessionName, EOnJ
 
 void UMultiplayerSessionSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (OnlineSession)
+	{
+		OnlineSession->ClearOnDestroySessionCompleteDelegate_Handle(OnSessDestroy_handle);
+	}
+
+	MultiplayerOnSessionDestroyDelegate.Broadcast(bWasSuccessful);
 }
 
 void UMultiplayerSessionSubsystem::OnStartSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (OnlineSession)
+	{
+		OnlineSession->ClearOnStartSessionCompleteDelegate_Handle(OnSessStart_handle);
+	}
+	MultiplayerOnSessionStartDelegate.Broadcast(bWasSuccessful);
 }
 
 UMultiplayerSessionSubsystem::UMultiplayerSessionSubsystem() :
@@ -164,6 +177,10 @@ void UMultiplayerSessionSubsystem::DestroySession()
 
 	OnSessDestroy_handle = OnlineSession->AddOnDestroySessionCompleteDelegate_Handle(OnSessDestroyDelegate);
 
+	if (!OnlineSession->DestroySession(NAME_GameSession)) {
+		OnlineSession->ClearOnDestroySessionCompleteDelegate_Handle(OnSessDestroy_handle);
+		MultiplayerOnSessionDestroyDelegate.Broadcast(false);
+	}
 }
 
 void UMultiplayerSessionSubsystem::StartSession()
@@ -172,5 +189,11 @@ void UMultiplayerSessionSubsystem::StartSession()
 		return;
 	}
 	OnSessStart_handle = OnlineSession->AddOnStartSessionCompleteDelegate_Handle(OnSessStartDelegate);
+
+	if (!OnlineSession->StartSession(NAME_GameSession))
+	{
+		OnlineSession->ClearOnStartSessionCompleteDelegate_Handle(OnSessStart_handle);
+		MultiplayerOnSessionStartDelegate.Broadcast(false);
+	}
 	
 }

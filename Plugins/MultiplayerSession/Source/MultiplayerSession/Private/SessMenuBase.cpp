@@ -134,7 +134,7 @@ void USessMenuBase::OnJoinSession(EOnJoinSessionCompleteResult::Type result)
 	if (subsystem) {
 		IOnlineSessionPtr  OnlineSessionInterface = subsystem->GetSessionInterface();
 		FString Address;
-		if (GEngine && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+		if ( OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
 			//get playercontroller of this instance
 			APlayerController* playerCtrller = GetGameInstance()->GetFirstLocalPlayerController();
 			if (playerCtrller) {

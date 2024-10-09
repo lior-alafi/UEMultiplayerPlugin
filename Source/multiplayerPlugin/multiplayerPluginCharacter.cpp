@@ -64,21 +64,21 @@ AmultiplayerPluginCharacter::AmultiplayerPluginCharacter():
 
 
 	//multiplayer
-	IOnlineSubsystem* onlineSubsystem = IOnlineSubsystem::Get();
-	if (onlineSubsystem) {
-		OnlineSessionInterface = onlineSubsystem->GetSessionInterface();
+	//IOnlineSubsystem* onlineSubsystem = IOnlineSubsystem::Get();
+	//if (onlineSubsystem) {
+	//	OnlineSessionInterface = onlineSubsystem->GetSessionInterface();
 
-		//print log to screen
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, // keep previous msgs
-				15.f, //display for 15s
-				FColor::Blue,
-				FString::Printf(TEXT("Found a subsystem: %s"),*onlineSubsystem->GetSubsystemName().ToString())
-				);
-		}
-	}
+	//	//print log to screen
+	//	if (GEngine)
+	//	{
+	//		GEngine->AddOnScreenDebugMessage(
+	//			-1, // keep previous msgs
+	//			15.f, //display for 15s
+	//			FColor::Blue,
+	//			FString::Printf(TEXT("Found a subsystem: %s"),*onlineSubsystem->GetSubsystemName().ToString())
+	//			);
+	//	}
+	//}
 }
 
 void AmultiplayerPluginCharacter::BeginPlay()
@@ -89,173 +89,173 @@ void AmultiplayerPluginCharacter::BeginPlay()
 
 void AmultiplayerPluginCharacter::CreateGameSession()
 {
-	if (!OnlineSessionInterface.IsValid()) {
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Blue,
-			FString::Printf(TEXT("no game session")));
-		return;
-	}
+	//if (!OnlineSessionInterface.IsValid()) {
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Blue,
+	//		FString::Printf(TEXT("no game session")));
+	//	return;
+	//}
 
-	//we can only have 1 session alive at a time, using "NAME_GameSession" make sure we call the same one
-	auto existingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
+	////we can only have 1 session alive at a time, using "NAME_GameSession" make sure we call the same one
+	//auto existingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
 
-	if (existingSession != nullptr) {
-		// if exist destroy so we can create a new one
-		OnlineSessionInterface->DestroySession(NAME_GameSession);
-	}
+	//if (existingSession != nullptr) {
+	//	// if exist destroy so we can create a new one
+	//	OnlineSessionInterface->DestroySession(NAME_GameSession);
+	//}
 
-	//adding delegate
-	OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(createSessionCompleteDelegate);
+	////adding delegate
+	//OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(createSessionCompleteDelegate);
 
 
-	//session settings
-	TSharedPtr<FOnlineSessionSettings> SessSettings = MakeShareable(new FOnlineSessionSettings());
-	SessSettings->bIsLANMatch = false;
-	//how many players
-	SessSettings->NumPublicConnections = 4; 
-	//allow people to join while session is alive
-	SessSettings->bAllowJoinInProgress = true;
-	// find players by region
-	SessSettings->bAllowJoinViaPresence = true;
-	// steam advertize the session
-	SessSettings->bShouldAdvertise = true;
-	//use presence(regions) info 
-	SessSettings->bUsesPresence = true;
+	////session settings
+	//TSharedPtr<FOnlineSessionSettings> SessSettings = MakeShareable(new FOnlineSessionSettings());
+	//SessSettings->bIsLANMatch = false;
+	////how many players
+	//SessSettings->NumPublicConnections = 4; 
+	////allow people to join while session is alive
+	//SessSettings->bAllowJoinInProgress = true;
+	//// find players by region
+	//SessSettings->bAllowJoinViaPresence = true;
+	//// steam advertize the session
+	//SessSettings->bShouldAdvertise = true;
+	////use presence(regions) info 
+	//SessSettings->bUsesPresence = true;
 
-	SessSettings->bIsDedicated = false;
+	//SessSettings->bIsDedicated = false;
 
-	//if cannot find sessions enable this
-	SessSettings->bUseLobbiesIfAvailable = true;
-	
-	//creating a custom (matchType) session attribute
-	SessSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	////if cannot find sessions enable this
+	//SessSettings->bUseLobbiesIfAvailable = true;
+	//
+	////creating a custom (matchType) session attribute
+	//SessSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
-	//host player id
-	const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	
-	bool isSuccess = OnlineSessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessSettings);
-	
-	if (isSuccess) {
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Blue,
-			FString::Printf(TEXT("created session")));
-	}
+	////host player id
+	//const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	//
+	//bool isSuccess = OnlineSessionInterface->CreateSession(*localPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessSettings);
+	//
+	//if (isSuccess) {
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Blue,
+	//		FString::Printf(TEXT("created session")));
+	//}
 
 
 }
 
 void AmultiplayerPluginCharacter::JoinGameSession()
 {
-	if (!OnlineSessionInterface.IsValid()) {
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Red,
-			FString::Printf(TEXT("invalid session")));
-		return;
-	}
-	//add onfind delegate
-	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(findSessionCompleteDelegate);
+	//if (!OnlineSessionInterface.IsValid()) {
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Red,
+	//		FString::Printf(TEXT("invalid session")));
+	//	return;
+	//}
+	////add onfind delegate
+	//OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(findSessionCompleteDelegate);
 
-	auto UserUniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
-	sessSearchSettings = MakeShareable(new FOnlineSessionSearch());
-	
-	//in normal case we should select something lower(4) but since our steam id is shared(480)
-	//many users use that
-	sessSearchSettings->MaxSearchResults = 10000;
-	//it's not a LAN game
-	sessSearchSettings->bIsLanQuery = false;
-
-
-	/** Search for presence sessions only (because when we created the session we allowed presence */	
-	sessSearchSettings->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	//auto UserUniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
+	//sessSearchSettings = MakeShareable(new FOnlineSessionSearch());
+	//
+	////in normal case we should select something lower(4) but since our steam id is shared(480)
+	////many users use that
+	//sessSearchSettings->MaxSearchResults = 10000;
+	////it's not a LAN game
+	//sessSearchSettings->bIsLanQuery = false;
 
 
+	///** Search for presence sessions only (because when we created the session we allowed presence */	
+	//sessSearchSettings->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
-	OnlineSessionInterface->FindSessions(*UserUniqueId, sessSearchSettings.ToSharedRef());
+
+
+	//OnlineSessionInterface->FindSessions(*UserUniqueId, sessSearchSettings.ToSharedRef());
 }
 
 void AmultiplayerPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	if (!OnlineSessionInterface.IsValid()) {
-		return;
-	}
+	//if (!OnlineSessionInterface.IsValid()) {
+	//	return;
+	//}
 
 
-	if (bWasSuccessful)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Blue,
-			FString::Printf(TEXT("%s created successfuly"), *SessionName.ToString()));
+	//if (bWasSuccessful)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Blue,
+	//		FString::Printf(TEXT("%s created successfuly"), *SessionName.ToString()));
 
-		//Jump to the Lobby level after session was created
-		UWorld* world = GetWorld();
-		if (world)
-		{
-			world->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
-		}
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Red,
-			FString::Printf(TEXT("failed to create session")));
-	}
+	//	//Jump to the Lobby level after session was created
+	//	UWorld* world = GetWorld();
+	//	if (world)
+	//	{
+	//		world->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
+	//	}
+	//}
+	//else
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Red,
+	//		FString::Printf(TEXT("failed to create session")));
+	//}
 }
 
 void AmultiplayerPluginCharacter::OnFindSessionComplete(bool bWasSuccessful)
 {
-	if (!OnlineSessionInterface.IsValid()) {
-		return;
-	}
+	//if (!OnlineSessionInterface.IsValid()) {
+	//	return;
+	//}
 
-	if (!bWasSuccessful)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 15.f, FColor::Red,
-			FString::Printf(TEXT("failed to join session")));
-		return;
-	}
+	//if (!bWasSuccessful)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1, 15.f, FColor::Red,
+	//		FString::Printf(TEXT("failed to join session")));
+	//	return;
+	//}
 
-	for(auto result : sessSearchSettings->SearchResults)
-	{
-		FString sessId = result.GetSessionIdStr();
-		FString user = result.Session.OwningUserName;
-		FString matchType;
-		//if value for this key is the same type as value provide(Fstring) it will fill that variable
-		bool found = result.Session.SessionSettings.Get(FName("MatchType"),matchType);
-		if (found && GEngine && matchType == FString("FreeForAll")) {
-			GEngine->AddOnScreenDebugMessage(
-				-1, 15.f, FColor::Green,
-				FString::Printf(TEXT("id: %s user: %s matchType: %s"), *sessId, *user,*matchType));
+	//for(auto result : sessSearchSettings->SearchResults)
+	//{
+	//	FString sessId = result.GetSessionIdStr();
+	//	FString user = result.Session.OwningUserName;
+	//	FString matchType;
+	//	//if value for this key is the same type as value provide(Fstring) it will fill that variable
+	//	bool found = result.Session.SessionSettings.Get(FName("MatchType"),matchType);
+	//	if (found && GEngine && matchType == FString("FreeForAll")) {
+	//		GEngine->AddOnScreenDebugMessage(
+	//			-1, 15.f, FColor::Green,
+	//			FString::Printf(TEXT("id: %s user: %s matchType: %s"), *sessId, *user,*matchType));
 
-			//register delegate
-			OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(joinSessionCompleteDelegate);
-			
-			const auto uniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
-			OnlineSessionInterface->JoinSession(*uniqueId, NAME_GameSession, result);
-		}
+	//		//register delegate
+	//		OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(joinSessionCompleteDelegate);
+	//		
+	//		const auto uniqueId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId();
+	//		OnlineSessionInterface->JoinSession(*uniqueId, NAME_GameSession, result);
+	//	}
 
-	}
+	//}
 }
 
 void AmultiplayerPluginCharacter::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type result)
 {
-	if (!OnlineSessionInterface.IsValid()) {
-		return;
-	}
+	//if (!OnlineSessionInterface.IsValid()) {
+	//	return;
+	//}
 
-	//now get address
-	FString Address;
-	if (GEngine && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
-		GEngine->AddOnScreenDebugMessage(-1, 15.f,
-			FColor::Green, FString::Printf(TEXT("client connected to address %s"), *Address));
+	////now get address
+	//FString Address;
+	//if (GEngine && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+	//	GEngine->AddOnScreenDebugMessage(-1, 15.f,
+	//		FColor::Green, FString::Printf(TEXT("client connected to address %s"), *Address));
 
-		//get playercontroller of this instance
-		APlayerController* playerCtrller = GetGameInstance()->GetFirstLocalPlayerController();
-		if (playerCtrller) {
-			//travel to this address
-			playerCtrller->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
-		}
-	}
+	//	//get playercontroller of this instance
+	//	APlayerController* playerCtrller = GetGameInstance()->GetFirstLocalPlayerController();
+	//	if (playerCtrller) {
+	//		//travel to this address
+	//		playerCtrller->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+	//	}
+	//}
 }
 
 //////////////////////////////////////////////////////////////////////////
