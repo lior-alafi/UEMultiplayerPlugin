@@ -20,6 +20,7 @@ void USessMenuBase::hostButtonClicked()
 
 	//lay host a session basic 
 	if (onlineSessSubsystem) {
+		hostBtn->SetIsEnabled(false);
 		onlineSessSubsystem->CreateSession(MaxConnections, GameType);
 	}
 }
@@ -36,6 +37,7 @@ void USessMenuBase::joinButtonClicked()
 	}
 	//lay join session basic
 	if (onlineSessSubsystem) {
+		joinBtn->SetIsEnabled(false);
 		onlineSessSubsystem->FindSessions(10000);
 	}
 }
@@ -98,15 +100,23 @@ void USessMenuBase::OnCreateSession(bool bWasSuccessful)
 		//travel to lobby
 		world->ServerTravel(FString::Printf(TEXT("%s?listen"), *LobbyPath));
 	}
+	else {
+		hostBtn->SetIsEnabled(true);
+	}
 }
 
 void USessMenuBase::OnFindSessions(const TArray<FOnlineSessionSearchResult>& sess, bool bWasSuccessful)
 {
-	if (!bWasSuccessful && GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString("failed to find a session"));
+	if (!bWasSuccessful || sess.Num()== 0) {
+		if (GEngine) {
+			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString("failed to find a session"));
+		}
+		joinBtn->SetIsEnabled(true);
 		return;
 	}
+	
 	if (onlineSessSubsystem == nullptr) {
+		joinBtn->SetIsEnabled(true);
 		return;
 	}
 	for (const auto& res : sess)
@@ -130,6 +140,8 @@ void USessMenuBase::OnJoinSession(EOnJoinSessionCompleteResult::Type result)
 {
 	//1. get correct address 
 	//2. client travel to that address
+
+
 	IOnlineSubsystem* subsystem = IOnlineSubsystem::Get();
 	if (subsystem) {
 		IOnlineSessionPtr  OnlineSessionInterface = subsystem->GetSessionInterface();
@@ -142,6 +154,10 @@ void USessMenuBase::OnJoinSession(EOnJoinSessionCompleteResult::Type result)
 				playerCtrller->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
 		}
+	}
+
+	if (result != EOnJoinSessionCompleteResult::Success) {
+		joinBtn->SetIsEnabled(true);
 	}
 }
 
