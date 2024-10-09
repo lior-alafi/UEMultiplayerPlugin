@@ -24,9 +24,16 @@ class MULTIPLAYERSESSION_API UMultiplayerSessionSubsystem : public UGameInstance
 	
 private:
 	IOnlineSessionPtr OnlineSession;
+	bool bCreateSessionOnDestry{ false };
 	
+	//createSession variables
+	int32 numOfPublicAcceptedConnections = 4;
+	FString MatchType;
+
+	//settings
 	TSharedPtr<FOnlineSessionSettings> SessSettings;
 	TSharedPtr<FOnlineSessionSearch> searchSessSettings;
+
 	//delegates
 	FOnCreateSessionCompleteDelegate OnSessCreateDelegate;
 	FOnFindSessionsCompleteDelegate OnSessFindDelegate;

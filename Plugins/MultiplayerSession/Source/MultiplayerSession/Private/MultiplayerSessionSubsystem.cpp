@@ -69,6 +69,11 @@ void UMultiplayerSessionSubsystem::OnDestroySessionComplete(FName SessionName, b
 		OnlineSession->ClearOnDestroySessionCompleteDelegate_Handle(OnSessDestroy_handle);
 	}
 
+	if (bCreateSessionOnDestry && bWasSuccessful) {
+		bCreateSessionOnDestry = false;
+		CreateSession(numOfPublicAcceptedConnections, MatchType);
+	}
+
 	MultiplayerOnSessionDestroyDelegate.Broadcast(bWasSuccessful);
 }
 
@@ -88,7 +93,7 @@ UMultiplayerSessionSubsystem::UMultiplayerSessionSubsystem() :
 	OnSessDestroyDelegate(FOnDestroySessionCompleteDelegate::CreateUObject(this,&ThisClass::OnDestroySessionComplete)),
 	OnSessStartDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this,&ThisClass::OnStartSessionComplete))
 {
-	
+	MatchType = FString(TEXT("freeforall"));
 
 	IOnlineSubsystem* subsystem = IOnlineSubsystem::Get();
 	if (subsystem) {
@@ -104,19 +109,23 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 numPublicPlayers, FString
 	if (!OnlineSession.IsValid()) {
 		return;
 	}
+
+	numOfPublicAcceptedConnections = numPublicPlayers;
+	MatchType = matchType;
 	//check if a session exists if so we disconnect and connect to a new one
 	auto existingSession = OnlineSession->GetNamedSession(NAME_GameSession);
 
 	//do not replace this to !existingSession IT WILL NOT CLOSE SESSIONS
 	if (existingSession != nullptr)
 	{
-		OnlineSession->DestroySession(NAME_GameSession);
+		DestroySession();
+		bCreateSessionOnDestry = true;
 	}
 
 	//store delegate in fdelegate, we need to remove the delegate later
 	OnSessCreate_handle = OnlineSession->AddOnCreateSessionCompleteDelegate_Handle(OnSessCreateDelegate);
 	
-	PrepareSessionSettings(numPublicPlayers, matchType);
+	PrepareSessionSettings(numOfPublicAcceptedConnections, MatchType);
 	
 	const int32 uniqueId = GetWorld()->GetFirstPlayerController()->GetUniqueID();	
 	if (!OnlineSession->CreateSession(uniqueId, NAME_GameSession, *SessSettings))
@@ -172,6 +181,7 @@ void UMultiplayerSessionSubsystem::JoinSession(const FOnlineSessionSearchResult&
 void UMultiplayerSessionSubsystem::DestroySession()
 {
 	if (!OnlineSession.IsValid()) {
+		MultiplayerOnSessionDestroyDelegate.Broadcast(false);
 		return;
 	}
 
@@ -186,6 +196,7 @@ void UMultiplayerSessionSubsystem::DestroySession()
 void UMultiplayerSessionSubsystem::StartSession()
 {
 	if (!OnlineSession.IsValid()) {
+		MultiplayerOnSessionStartDelegate.Broadcast(false);
 		return;
 	}
 	OnSessStart_handle = OnlineSession->AddOnStartSessionCompleteDelegate_Handle(OnSessStartDelegate);
